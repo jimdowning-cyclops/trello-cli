@@ -64,7 +64,8 @@ Simply mention "Trello" when talking to Claude Code:
 
 | File | Description |
 |------|-------------|
-| [TRELLO_CLI_INSTRUCTION.md](TRELLO_CLI_INSTRUCTION.md) | Detailed command reference and usage examples for AI |
+| [docs/instruction.md](docs/instruction.md) | Detailed command reference and usage examples for AI |
+| [docs/system-prompt.md](docs/system-prompt.md) | System prompt for AI integration |
 | [.claude/skills/trello-cli/SKILL.md](.claude/skills/trello-cli/SKILL.md) | Claude Code skill definition and quick reference |
 | [.claude/skills/trello-cli/REFERENCE.md](.claude/skills/trello-cli/REFERENCE.md) | Complete documentation of all commands |
 
@@ -138,4 +139,4 @@ trello-cli --delete-card <card-id>
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
