@@ -17,6 +17,8 @@ You can manage Trello via `trello-cli`. All outputs are JSON: `{"ok":true,"data"
 | `--update-card <card-id> [--name "..."] [--desc "..."] [--due "..."]` | Update card |
 | `--move-card <card-id> <list-id>` | Move card to list |
 | `--delete-card <card-id>` | Delete card |
+| `--get-comments <card-id>` | Get comments on card |
+| `--add-comment <card-id> "<text>"` | Add comment to card |
 | `--check-auth` | Verify auth |
 
 ## Workflow

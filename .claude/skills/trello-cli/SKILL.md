@@ -31,7 +31,20 @@ trello-cli --create-card <list-id> "<name>" --desc "<desc>" --due "2025-01-15"
 trello-cli --update-card <card-id> --name "<name>" --desc "<desc>"
 trello-cli --move-card <card-id> <list-id>           # Move card
 trello-cli --delete-card <card-id>                   # Delete card
+trello-cli --get-comments <card-id>                  # Get comments
+trello-cli --add-comment <card-id> "<text>"          # Add comment
 ```
+
+### Attachments
+
+```bash
+trello-cli --list-attachments <card-id>              # List attachments
+trello-cli --upload-attachment <card-id> <file-path> [--name "<name>"]
+trello-cli --attach-url <card-id> <url> [--name "<name>"]
+trello-cli --delete-attachment <card-id> <attach-id>
+```
+
+**Note:** Downloading attachments is not supported - Trello's download API requires browser authentication. Use `--attach-url` to link attachments between cards.
 
 ## Typical Workflows
 
@@ -77,3 +90,9 @@ For detailed command reference, see [REFERENCE.md](REFERENCE.md).
 
 **User:** "Update the Trello card description"
 → Run `--update-card <card-id> --desc "<new-desc>"`
+
+**User:** "Upload this file to the Trello card"
+→ Run `--upload-attachment <card-id> "<file-path>"`
+
+**User:** "Link an attachment to another Trello card"
+→ Run `--list-attachments <source-card-id>` to get the URL, then `--attach-url <target-card-id> <url>`

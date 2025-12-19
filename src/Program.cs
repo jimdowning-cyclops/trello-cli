@@ -65,6 +65,7 @@ var api = new TrelloApiService(config);
 var boardCmd = new BoardCommands(api);
 var listCmd = new ListCommands(api);
 var cardCmd = new CardCommands(api);
+var attachCmd = new AttachmentCommands(api);
 
 try
 {
@@ -152,6 +153,39 @@ async Task ExecuteCommand(string[] args)
             await cardCmd.DeleteCardAsync(GetArg(args, 1));
             break;
 
+        case "--get-comments":
+            await cardCmd.GetCommentsAsync(GetArg(args, 1));
+            break;
+
+        case "--add-comment":
+            await cardCmd.AddCommentAsync(GetArg(args, 1), GetArg(args, 2));
+            break;
+
+        // Attachment commands
+        case "--list-attachments":
+            await attachCmd.GetAttachmentsAsync(GetArg(args, 1));
+            break;
+
+        case "--upload-attachment":
+            await attachCmd.UploadAttachmentAsync(
+                GetArg(args, 1),
+                GetArg(args, 2),
+                GetNamedArg(args, "--name")
+            );
+            break;
+
+        case "--attach-url":
+            await attachCmd.AttachUrlAsync(
+                GetArg(args, 1),
+                GetArg(args, 2),
+                GetNamedArg(args, "--name")
+            );
+            break;
+
+        case "--delete-attachment":
+            await attachCmd.DeleteAttachmentAsync(GetArg(args, 1), GetArg(args, 2));
+            break;
+
         default:
             OutputFormatter.Print(ApiResponse<object>.Fail($"Unknown command: {command}", "UNKNOWN_COMMAND"));
             break;
@@ -221,6 +255,19 @@ COMMANDS:
       [--members <ids>]
     --move-card <card-id> <list-id>     Move card to list
     --delete-card <card-id>             Delete card
+    --get-comments <card-id>            Get comments on a card
+    --add-comment <card-id> <text>      Add comment to a card
+
+  Attachment:
+    --list-attachments <card-id>                 List attachments on a card
+    --upload-attachment <card-id> <file-path>    Upload file as attachment
+      [--name <name>]                            Custom attachment name
+    --attach-url <card-id> <url>                 Attach URL to card
+      [--name <name>]                            Custom attachment name
+    --delete-attachment <card-id> <attach-id>    Delete attachment
+
+  Note: Downloading attachments is not supported. Trello's download API
+  requires browser authentication. Use --attach-url to link attachments.
 
 OUTPUT:
   All responses are JSON: {{""ok"":true,""data"":...}} or {{""ok"":false,""error"":""...""}}

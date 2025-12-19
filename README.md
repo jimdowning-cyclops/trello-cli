@@ -129,11 +129,24 @@ trello-cli --create-card <list-id> "<name>" [--desc "<desc>"] [--due "YYYY-MM-DD
 trello-cli --update-card <card-id> [--name "<name>"] [--desc "<desc>"] [--due "<date>"]
 trello-cli --move-card <card-id> <target-list-id>
 trello-cli --delete-card <card-id>
+
+# Comment operations
+trello-cli --get-comments <card-id>
+trello-cli --add-comment <card-id> "<text>"
+
+# Attachment operations
+trello-cli --list-attachments <card-id>
+trello-cli --upload-attachment <card-id> <file-path> [--name "<name>"]
+trello-cli --attach-url <card-id> <url> [--name "<name>"]
+trello-cli --delete-attachment <card-id> <attachment-id>
+
+# Note: Downloading attachments is not supported - Trello's download API
+# requires browser authentication. Use --attach-url to link attachments.
 ```
 
 ## Requirements
 
-- .NET 6.0 or later
+- .NET 10.0 or later
 - Trello account with API access
 
 ## License

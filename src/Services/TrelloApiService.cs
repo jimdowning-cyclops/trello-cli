@@ -297,6 +297,57 @@ public class TrelloApiService
         }
     }
 
+    // Comment operations
+    public async Task<ApiResponse<List<Comment>>> GetCommentsAsync(string cardId)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/actions", "filter=commentCard");
+            var response = await _http.GetStringAsync(url);
+            var comments = JsonSerializer.Deserialize<List<Comment>>(response) ?? new();
+            return ApiResponse<List<Comment>>.Success(comments);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<List<Comment>>.Fail("Card not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<List<Comment>>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<List<Comment>>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    public async Task<ApiResponse<Comment>> AddCommentAsync(string cardId, string text)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/actions/comments", $"text={Uri.EscapeDataString(text)}");
+            var response = await _http.PostAsync(url, null);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var comment = JsonSerializer.Deserialize<Comment>(content);
+            return comment != null
+                ? ApiResponse<Comment>.Success(comment)
+                : ApiResponse<Comment>.Fail("Failed to add comment", "CREATE_FAILED");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<Comment>.Fail("Card not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<Comment>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<Comment>.Fail(ex.Message, "ERROR");
+        }
+    }
+
     // Auth check
     public async Task<ApiResponse<object>> CheckAuthAsync()
     {
@@ -324,5 +375,192 @@ public class TrelloApiService
         {
             return ApiResponse<object>.Fail(ex.Message, "ERROR");
         }
+    }
+
+    // Attachment operations
+    public async Task<ApiResponse<List<Attachment>>> GetAttachmentsAsync(string cardId)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/attachments");
+            var response = await _http.GetStringAsync(url);
+            var attachments = JsonSerializer.Deserialize<List<Attachment>>(response) ?? new();
+            return ApiResponse<List<Attachment>>.Success(attachments);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<List<Attachment>>.Fail("Card not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<List<Attachment>>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<List<Attachment>>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    public async Task<ApiResponse<Attachment>> GetAttachmentAsync(string cardId, string attachmentId)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/attachments/{attachmentId}");
+            var response = await _http.GetStringAsync(url);
+            var attachment = JsonSerializer.Deserialize<Attachment>(response);
+            return attachment != null
+                ? ApiResponse<Attachment>.Success(attachment)
+                : ApiResponse<Attachment>.Fail("Attachment not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<Attachment>.Fail("Attachment not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    public async Task<ApiResponse<Attachment>> UploadAttachmentAsync(string cardId, string filePath, string? name = null)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+                return ApiResponse<Attachment>.Fail($"File not found: {filePath}", "FILE_NOT_FOUND");
+
+            var url = BuildUrl($"/cards/{cardId}/attachments");
+
+            using var content = new MultipartFormDataContent();
+            using var fileStream = File.OpenRead(filePath);
+            var streamContent = new StreamContent(fileStream);
+
+            var fileName = name ?? Path.GetFileName(filePath);
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
+                GetMimeType(filePath));
+
+            content.Add(streamContent, "file", fileName);
+
+            if (!string.IsNullOrEmpty(name))
+                content.Add(new StringContent(name), "name");
+
+            var response = await _http.PostAsync(url, content);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var attachment = JsonSerializer.Deserialize<Attachment>(responseContent);
+
+            return attachment != null
+                ? ApiResponse<Attachment>.Success(attachment)
+                : ApiResponse<Attachment>.Fail("Failed to upload attachment", "UPLOAD_FAILED");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<Attachment>.Fail("Card not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    public async Task<ApiResponse<Attachment>> AttachUrlAsync(string cardId, string attachUrl, string? name = null)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/attachments");
+
+            var formData = new Dictionary<string, string>
+            {
+                ["url"] = attachUrl
+            };
+            if (!string.IsNullOrEmpty(name))
+                formData["name"] = name;
+
+            var content = new FormUrlEncodedContent(formData);
+            var response = await _http.PostAsync(url, content);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var attachment = JsonSerializer.Deserialize<Attachment>(responseContent);
+
+            return attachment != null
+                ? ApiResponse<Attachment>.Success(attachment)
+                : ApiResponse<Attachment>.Fail("Failed to attach URL", "ATTACH_FAILED");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<Attachment>.Fail("Card not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<Attachment>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    public async Task<ApiResponse<bool>> DeleteAttachmentAsync(string cardId, string attachmentId)
+    {
+        try
+        {
+            var url = BuildUrl($"/cards/{cardId}/attachments/{attachmentId}");
+            var response = await _http.DeleteAsync(url);
+            response.EnsureSuccessStatusCode();
+            return ApiResponse<bool>.Success(true);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return ApiResponse<bool>.Fail("Attachment not found", "NOT_FOUND");
+        }
+        catch (HttpRequestException ex)
+        {
+            return ApiResponse<bool>.Fail(ex.Message, "HTTP_ERROR");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<bool>.Fail(ex.Message, "ERROR");
+        }
+    }
+
+    private static string GetMimeType(string filePath)
+    {
+        var ext = Path.GetExtension(filePath).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".pdf" => "application/pdf",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".xls" => "application/vnd.ms-excel",
+            ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ".ppt" => "application/vnd.ms-powerpoint",
+            ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            ".txt" => "text/plain",
+            ".csv" => "text/csv",
+            ".zip" => "application/zip",
+            ".json" => "application/json",
+            ".xml" => "application/xml",
+            ".html" or ".htm" => "text/html",
+            ".css" => "text/css",
+            ".js" => "application/javascript",
+            ".mp3" => "audio/mpeg",
+            ".mp4" => "video/mp4",
+            ".mov" => "video/quicktime",
+            _ => "application/octet-stream"
+        };
     }
 }
