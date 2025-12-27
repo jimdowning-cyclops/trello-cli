@@ -17,9 +17,12 @@ All commands return JSON:
 | Code | Meaning |
 |------|---------|
 | `AUTH_ERROR` | Not authenticated or invalid credentials |
-| `NOT_FOUND` | Board/List/Card not found |
+| `NOT_FOUND` | Board/List/Card/Attachment not found |
 | `MISSING_PARAM` | Required parameter missing |
 | `HTTP_ERROR` | Network or API error |
+| `FILE_NOT_FOUND` | Local file does not exist (for uploads) |
+| `UPLOAD_FAILED` | Attachment upload failed |
+| `ATTACH_FAILED` | URL attachment failed |
 | `ERROR` | General error |
 
 ---
@@ -130,6 +133,66 @@ trello-cli --delete-card <card-id>
 # Returns: {"ok":true,"data":true}
 ```
 
+### Comment Operations
+
+#### Reading Comments
+
+```bash
+# Get all comments on a card
+trello-cli --get-comments <card-id>
+# Returns: {"ok":true,"data":[{"id":"...","date":"...","data":{"text":"..."},"memberCreator":{"id":"...","fullName":"...","username":"..."}}]}
+```
+
+#### Adding Comments
+
+```bash
+# Add a comment to a card
+trello-cli --add-comment <card-id> "<comment-text>"
+# Returns: {"ok":true,"data":{"id":"...","date":"...","data":{"text":"..."},"memberCreator":{"id":"...","fullName":"...","username":"..."}}}
+```
+
+### Attachment Operations
+
+**Note:** Downloading attachments is not supported. Trello's download API requires browser session authentication, not API tokens. Use `--attach-url` to link attachments between cards instead.
+
+#### Listing Attachments
+
+```bash
+# List all attachments on a card
+trello-cli --list-attachments <card-id>
+# Returns: {"ok":true,"data":[{"id":"...","name":"file.pdf","url":"...","bytes":12345,"mimeType":"application/pdf","date":"...","isUpload":true}]}
+```
+
+#### Uploading Attachments
+
+```bash
+# Upload a local file
+trello-cli --upload-attachment <card-id> "/path/to/file.pdf"
+
+# Upload with custom name
+trello-cli --upload-attachment <card-id> "/path/to/file.pdf" --name "Project Spec"
+# Returns: {"ok":true,"data":{"id":"...","name":"Project Spec","url":"...","bytes":12345,"mimeType":"application/pdf"}}
+```
+
+#### Attaching URLs
+
+```bash
+# Attach a URL to a card
+trello-cli --attach-url <card-id> "https://example.com/document.pdf"
+
+# Attach URL with custom name
+trello-cli --attach-url <card-id> "https://example.com/document.pdf" --name "External Doc"
+# Returns: {"ok":true,"data":{"id":"...","name":"External Doc","url":"https://example.com/document.pdf"}}
+```
+
+#### Deleting Attachments
+
+```bash
+# Delete an attachment from a card
+trello-cli --delete-attachment <card-id> <attachment-id>
+# Returns: {"ok":true,"data":true}
+```
+
 ---
 
 ## Common Workflows
@@ -186,6 +249,24 @@ trello-cli --get-card <card-id>
 # Update what you need
 trello-cli --update-card <card-id> --desc "Updated requirements: ..."
 ```
+
+### 6. Work with Attachments
+
+```bash
+# List attachments on a card
+trello-cli --list-attachments <card-id>
+
+# Upload a file to a card
+trello-cli --upload-attachment <card-id> "./document.pdf" --name "Project Spec"
+
+# Attach a URL (also used to link attachments between cards)
+trello-cli --attach-url <card-id> "https://docs.google.com/..." --name "Design Doc"
+
+# Delete an attachment
+trello-cli --delete-attachment <card-id> <attachment-id>
+```
+
+Note: To copy an attachment between cards, use `--list-attachments` on the source card to get the URL, then `--attach-url` on the target card.
 
 ---
 

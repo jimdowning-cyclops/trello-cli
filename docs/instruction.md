@@ -65,6 +65,12 @@ trello-cli --move-card <card-id> <target-list-id>
 
 # Delete a card
 trello-cli --delete-card <card-id>
+
+# Get comments on a card
+trello-cli --get-comments <card-id>
+
+# Add a comment to a card
+trello-cli --add-comment <card-id> "<comment-text>"
 ```
 
 ## Response Examples
@@ -87,6 +93,16 @@ trello-cli --delete-card <card-id>
 ### Create Card
 ```json
 {"ok":true,"data":{"id":"newcard123","name":"New Task","listId":"list1"}}
+```
+
+### Get Comments
+```json
+{"ok":true,"data":[{"id":"action123","date":"2025-01-15T10:30:00.000Z","data":{"text":"This is a comment"},"memberCreator":{"id":"member123","fullName":"John Doe","username":"johndoe"}}]}
+```
+
+### Add Comment
+```json
+{"ok":true,"data":{"id":"action456","date":"2025-01-15T11:00:00.000Z","data":{"text":"New comment"},"memberCreator":{"id":"member123","fullName":"John Doe","username":"johndoe"}}}
 ```
 
 ### Error Response

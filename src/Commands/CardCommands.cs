@@ -108,4 +108,34 @@ public class CardCommands
         var result = await _api.DeleteCardAsync(cardId);
         OutputFormatter.Print(result);
     }
+
+    public async Task GetCommentsAsync(string cardId)
+    {
+        if (string.IsNullOrEmpty(cardId))
+        {
+            OutputFormatter.Print(ApiResponse<object>.Fail("Card ID required", "MISSING_PARAM"));
+            return;
+        }
+
+        var result = await _api.GetCommentsAsync(cardId);
+        OutputFormatter.Print(result);
+    }
+
+    public async Task AddCommentAsync(string cardId, string text)
+    {
+        if (string.IsNullOrEmpty(cardId))
+        {
+            OutputFormatter.Print(ApiResponse<object>.Fail("Card ID required", "MISSING_PARAM"));
+            return;
+        }
+
+        if (string.IsNullOrEmpty(text))
+        {
+            OutputFormatter.Print(ApiResponse<object>.Fail("Comment text required", "MISSING_PARAM"));
+            return;
+        }
+
+        var result = await _api.AddCommentAsync(cardId, text);
+        OutputFormatter.Print(result);
+    }
 }
