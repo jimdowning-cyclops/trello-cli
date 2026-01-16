@@ -1,6 +1,6 @@
 ---
 name: trello-cli
-description: Trello board, list and card management via CLI. Activate when user mentions "Trello" - examples: "Show my Trello tasks", "Add card to Trello", "Move on Trello", "Trello board", "List Trello", "Trello cards".
+description: "Trello board, list and card management via CLI. Activate when user mentions Trello."
 ---
 
 # Trello CLI
