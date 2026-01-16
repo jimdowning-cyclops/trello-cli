@@ -7,11 +7,24 @@ description: "Trello board, list and card management via CLI. Activate when user
 
 Manage Trello boards, lists, and cards using the `trello-cli` command.
 
+## Prerequisites
+
+Before using any commands, first check if the tool is installed and authenticated:
+
+```bash
+trello-cli --check-auth
+```
+
+- If you get `command not found`: The tool is not installed. Tell the user to install it with: `git clone https://github.com/jimdowning-cyclops/trello-cli && cd trello-cli && ./install.sh`
+- If you get `ok: false` with `AUTH_ERROR`: The user needs to set up credentials. Direct them to https://trello.com/app-key to get their API key and token, then run: `trello-cli --set-auth <api-key> <token>`
+- If you get `ok: true`: Proceed with the requested operation.
+
 ## Important Rules
 
-1. **Only activate when "Trello" is mentioned** - Do not interfere with Notion, Jira, or other tools
-2. **Check JSON output after each command** - `ok: true` means success, `ok: false` means error
-3. **Follow the workflow**: First find board ID, then list ID, then perform card operations
+1. **Always check prerequisites first** - Run `--check-auth` before any other command
+2. **Only activate when "Trello" is mentioned** - Do not interfere with Notion, Jira, or other tools
+3. **Check JSON output after each command** - `ok: true` means success, `ok: false` means error
+4. **Follow the workflow**: First find board ID, then list ID, then perform card operations
 
 ## Quick Reference
 
