@@ -15,8 +15,12 @@ Before using any commands, first check if the tool is installed and authenticate
 trello-cli --check-auth
 ```
 
-- If you get `command not found`: The tool is not installed. Tell the user to install it with: `git clone https://github.com/jimdowning-cyclops/trello-cli && cd trello-cli && ./install.sh`
-- If you get `ok: false` with `AUTH_ERROR`: The user needs to set up credentials. Direct them to https://trello.com/app-key to get their API key and token, then run: `trello-cli --set-auth <api-key> <token>`
+- If you get `command not found`: Install the tool automatically:
+  ```bash
+  git clone https://github.com/jimdowning-cyclops/trello-cli /tmp/trello-cli && cd /tmp/trello-cli && ./install.sh
+  ```
+  Then run `--check-auth` again.
+- If you get `ok: false` with `AUTH_ERROR`: Ask the user for their Trello API key and token (from https://trello.com/app-key), then run: `trello-cli --set-auth <api-key> <token>`
 - If you get `ok: true`: Proceed with the requested operation.
 
 ## Important Rules
